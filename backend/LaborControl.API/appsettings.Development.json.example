@@ -1,0 +1,27 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=laborcontrol;Port=5432;User Id=postgres;Password=YOUR_LOCAL_PASSWORD_HERE;Ssl Mode=Disable;"
+  },
+  "Jwt": {
+    "Key": "GENERATE_A_STRONG_SECRET_KEY_HERE_MINIMUM_64_CHARACTERS_RECOMMENDED",
+    "Issuer": "LaborControl",
+    "Audience": "LaborControlApp"
+  },
+  "Stripe": {
+    "SecretKey": "sk_test_YOUR_STRIPE_SECRET_KEY_HERE",
+    "PublishableKey": "pk_test_YOUR_STRIPE_PUBLIC_KEY_HERE"
+  },
+  "Rfid": {
+    "SecretKey": "GENERATE_A_256_BIT_HMAC_SHA256_SECRET_KEY_HERE_MINIMUM_64_CHARS"
+  },
+  "Insee": {
+    "ApiToken": "YOUR_INSEE_API_TOKEN_FROM_https://api.insee.fr"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}

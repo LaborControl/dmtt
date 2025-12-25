@@ -1,0 +1,79 @@
+# Build results
+bin/
+obj/
+out/
+publish/
+*.dll
+*.pdb
+*.exe
+
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# NuGet
+*.nupkg
+packages/
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Node modules (if using npm for tooling)
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.cache
+
+# Environment
+.env
+.env.local
+.env.production
+*.env.*
+
+# Configuration files with secrets
+appsettings.json
+appsettings.*.json
+!appsettings.Development.json.example
+
+# Blazor WebAssembly
+wwwroot/_framework/
+wwwroot/_bin_/
+wwwroot/css/app.css.map
+
+# Azure
+*.pubxml
+*.PublishSettings
+
+# Documentation files (will be added back at project completion)
+*.md

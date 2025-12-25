@@ -1,0 +1,157 @@
+@* Composant StatCard réutilisable - Design System Labor Control *@
+
+<div class="stat-card stat-card-@Variant">
+    <div class="stat-card-header">
+        <h3 class="stat-card-title">@Title</h3>
+        @if (!string.IsNullOrEmpty(Icon))
+        {
+            <div class="stat-card-icon">
+                @((MarkupString)Icon)
+            </div>
+        }
+    </div>
+
+    <div class="stat-card-body">
+        <div class="stat-card-value">@Value</div>
+        @if (!string.IsNullOrEmpty(Subtitle))
+        {
+            <p class="stat-card-subtitle">@Subtitle</p>
+        }
+    </div>
+
+    @if (ShowTrend && Trend != 0)
+    {
+        <div class="stat-card-footer">
+            <span class="stat-card-trend stat-card-trend-@(Trend > 0 ? "up" : "down")">
+                @if (Trend > 0)
+                {
+                    <span>↑ +@Trend%</span>
+                }
+                else
+                {
+                    <span>↓ @Trend%</span>
+                }
+            </span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string Value { get; set; } = "0";
+
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    [Parameter]
+    public string Variant { get; set; } = "primary"; // primary, success, warning, error, info
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public bool ShowTrend { get; set; } = false;
+
+    [Parameter]
+    public int Trend { get; set; } = 0; // Positive or negative percentage
+}
+
+<style>
+    .stat-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+    }
+
+    .stat-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .stat-card-primary {
+        border-left-color: var(--color-primary);
+    }
+
+    .stat-card-success {
+        border-left-color: var(--color-semantic-success);
+    }
+
+    .stat-card-warning {
+        border-left-color: var(--color-semantic-warning);
+    }
+
+    .stat-card-error {
+        border-left-color: var(--color-semantic-error);
+    }
+
+    .stat-card-info {
+        border-left-color: #0284c7;
+    }
+
+    .stat-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card-title {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--color-neutral-600);
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .stat-card-icon {
+        font-size: 1.5rem;
+        opacity: 0.7;
+    }
+
+    .stat-card-body {
+        margin-bottom: 1rem;
+    }
+
+    .stat-card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--color-neutral-900);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card-subtitle {
+        font-size: var(--text-sm);
+        color: var(--color-neutral-500);
+        margin: 0;
+    }
+
+    .stat-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 1rem;
+        border-top: 1px solid var(--color-neutral-200);
+    }
+
+    .stat-card-trend {
+        font-size: var(--text-sm);
+        font-weight: 600;
+    }
+
+    .stat-card-trend-up {
+        color: var(--color-semantic-success);
+    }
+
+    .stat-card-trend-down {
+        color: var(--color-semantic-error);
+    }
+</style>
+

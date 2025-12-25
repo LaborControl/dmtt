@@ -1,0 +1,76 @@
+@namespace LaborControl.Shared.Components
+
+@* Composant de carte statistique pour afficher les KPIs *@
+
+<div class="bg-slate-800 hover:bg-slate-700 border @BorderClass rounded-xl p-6 transition-all duration-300">
+    <div class="flex items-start justify-between mb-4">
+        <div>
+            <p class="text-gray-400 text-sm font-medium mb-1">@Title</p>
+            <h3 class="text-3xl font-bold text-white">@Value</h3>
+            @if (!string.IsNullOrEmpty(Subtitle))
+            {
+                <p class="text-gray-500 text-sm mt-1">@Subtitle</p>
+            }
+        </div>
+        @if (ShowTrend && Trend.HasValue)
+        {
+            <div class="flex items-center space-x-1">
+                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+                <span class="text-green-400 font-semibold">+@Trend%</span>
+            </div>
+        }
+    </div>
+    @if (!string.IsNullOrEmpty(Icon))
+    {
+        <div class="flex items-center justify-start">
+            <div class="w-12 h-12 @IconBgClass rounded-lg flex items-center justify-center">
+                @((MarkupString)Icon)
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Titre";
+
+    [Parameter]
+    public string Value { get; set; } = "0";
+
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    [Parameter]
+    public string Variant { get; set; } = "primary";
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public bool ShowTrend { get; set; } = false;
+
+    [Parameter]
+    public int? Trend { get; set; }
+
+    private string BorderClass => Variant switch
+    {
+        "primary" => "border-cyan-500/30 hover:border-cyan-500/60",
+        "success" => "border-green-500/30 hover:border-green-500/60",
+        "info" => "border-blue-500/30 hover:border-blue-500/60",
+        "warning" => "border-yellow-500/30 hover:border-yellow-500/60",
+        "danger" => "border-red-500/30 hover:border-red-500/60",
+        _ => "border-gray-500/30 hover:border-gray-500/60"
+    };
+
+    private string IconBgClass => Variant switch
+    {
+        "primary" => "bg-cyan-500/20",
+        "success" => "bg-green-500/20",
+        "info" => "bg-blue-500/20",
+        "warning" => "bg-yellow-500/20",
+        "danger" => "bg-red-500/20",
+        _ => "bg-gray-500/20"
+    };
+}

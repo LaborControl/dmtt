@@ -1,0 +1,283 @@
+@page "/welds"
+@using LaborControl.Dashboard.Services
+@inject ApiClient ApiClient
+
+<PageTitle>Soudures - DMTT</PageTitle>
+
+<div class="page-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-white mb-1">Soudures</h1>
+            <p class="text-slate-400 mb-0">Gestion et traçabilité des soudures</p>
+        </div>
+        <button class="btn btn-purple">
+            <span>+</span> Nouvelle soudure
+        </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="card bg-slate-800 border-0 mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label text-slate-400">Statut</label>
+                    <select class="form-select bg-slate-700 text-white border-0" @bind="filter.Status" @bind:after="LoadWelds">
+                        <option value="">Tous les statuts</option>
+                        <option value="PLANNED">Planifiée</option>
+                        <option value="PENDING_CCPU">En attente CCPU</option>
+                        <option value="CCPU_VALIDATED">Validée CCPU</option>
+                        <option value="IN_PROGRESS">En cours</option>
+                        <option value="PENDING_NDT">CND en attente</option>
+                        <option value="COMPLETED">Terminée</option>
+                        <option value="BLOCKED">Bloquée</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-slate-400">Procédé</label>
+                    <select class="form-select bg-slate-700 text-white border-0" @bind="filter.Process" @bind:after="LoadWelds">
+                        <option value="">Tous les procédés</option>
+                        <option value="111">111 - MMA</option>
+                        <option value="141">141 - TIG</option>
+                        <option value="135">135 - MAG</option>
+                        <option value="136">136 - Fil fourré</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-slate-400">Recherche</label>
+                    <input type="text" class="form-control bg-slate-700 text-white border-0"
+                           placeholder="Référence, soudeur..."
+                           @bind="filter.Search"
+                           @bind:after="LoadWelds" />
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-outline-light w-100" @onclick="ResetFilters">
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-purple" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="alert alert-danger">
+            @errorMessage
+            <button class="btn btn-sm btn-outline-danger ms-3" @onclick="LoadWelds">Réessayer</button>
+        </div>
+    }
+    else
+    {
+        <!-- Data Table -->
+        <div class="card bg-slate-800 border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead class="bg-slate-900">
+                            <tr>
+                                <th>Référence</th>
+                                <th>Équipement</th>
+                                <th>Procédé</th>
+                                <th>Soudeur</th>
+                                <th>Statut</th>
+                                <th>CCPU</th>
+                                <th>CND</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (welds.Any())
+                            {
+                                @foreach (var weld in welds)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="fw-bold text-orange">@weld.Reference</span>
+                                        </td>
+                                        <td class="text-slate-300">@weld.AssetName</td>
+                                        <td>
+                                            <span class="badge bg-slate-600">@weld.WeldingProcess</span>
+                                        </td>
+                                        <td class="text-slate-300">@(weld.WelderName ?? "-")</td>
+                                        <td>
+                                            <span class="badge @GetStatusClass(weld.Status)">@GetStatusLabel(weld.Status)</span>
+                                        </td>
+                                        <td>
+                                            @if (weld.IsCCPUValidated)
+                                            {
+                                                <span class="text-success">OK</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-warning">...</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="ndt-progress">@weld.NDTControlsCount CND</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-light btn-sm">Voir</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center text-slate-400 py-4">
+                                        Aucune soudure trouvée
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-slate-900 border-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-slate-400">@welds.Count soudure(s)</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<WeldDto> welds = new();
+    private WeldFilterRequest filter = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWelds();
+    }
+
+    private async Task LoadWelds()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await ApiClient.GetWeldsAsync(filter);
+            if (result != null)
+            {
+                welds = result.Items;
+            }
+            else
+            {
+                // Try without pagination wrapper
+                var directResult = await ApiClient.GetAsync<List<WeldDto>>("api/welds");
+                if (directResult != null)
+                {
+                    welds = directResult;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ResetFilters()
+    {
+        filter = new WeldFilterRequest();
+        await LoadWelds();
+    }
+
+    private string GetStatusClass(string status) => status switch
+    {
+        "COMPLETED" or "FINAL_VALIDATED" => "bg-success",
+        "IN_PROGRESS" => "bg-warning text-dark",
+        "PENDING_NDT" => "bg-info",
+        "CCPU_VALIDATED" => "bg-purple",
+        "PENDING_CCPU" or "PLANNED" => "bg-secondary",
+        "BLOCKED" => "bg-danger",
+        _ => "bg-secondary"
+    };
+
+    private string GetStatusLabel(string status) => status switch
+    {
+        "PLANNED" => "Planifiée",
+        "IN_PROGRESS" => "En cours",
+        "PENDING_CCPU" => "Att. CCPU",
+        "CCPU_VALIDATED" => "CCPU OK",
+        "PENDING_NDT" => "Att. CND",
+        "COMPLETED" => "Terminée",
+        "FINAL_VALIDATED" => "Validée",
+        "BLOCKED" => "Bloquée",
+        _ => status
+    };
+}
+
+<style>
+    .page-content { color: #f1f5f9; }
+    .text-slate-400 { color: #94a3b8; }
+    .text-slate-300 { color: #cbd5e1; }
+    .bg-slate-800 { background-color: #1e293b; }
+    .bg-slate-900 { background-color: #0f172a; }
+    .bg-slate-700 { background-color: #334155; }
+    .bg-slate-600 { background-color: #475569; }
+    .bg-purple { background-color: #8b5cf6 !important; }
+    .bg-orange { background-color: #f97316 !important; }
+    .text-orange { color: #f97316; }
+    .text-purple { color: #8b5cf6 !important; }
+
+    .btn-purple {
+        background-color: #8b5cf6;
+        border-color: #8b5cf6;
+        color: white;
+    }
+
+    .btn-purple:hover {
+        background-color: #7c3aed;
+        border-color: #7c3aed;
+    }
+
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-hover-bg: rgba(139, 92, 246, 0.1);
+    }
+
+    .table-dark th {
+        color: #94a3b8;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #334155;
+    }
+
+    .table-dark td {
+        border-bottom: 1px solid #334155;
+        vertical-align: middle;
+    }
+
+    .form-select, .form-control {
+        background-color: #334155 !important;
+    }
+
+    .form-select:focus, .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25);
+    }
+
+    .ndt-progress {
+        font-family: monospace;
+        color: #94a3b8;
+    }
+</style>

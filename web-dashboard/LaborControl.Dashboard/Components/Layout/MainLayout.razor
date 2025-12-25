@@ -1,0 +1,51 @@
+@inherits LayoutComponentBase
+
+<div class="page bg-slate-900 min-h-screen">
+    <div class="sidebar bg-slate-800">
+        <NavMenu />
+    </div>
+
+    <main class="main-content">
+        <div class="top-row px-4 bg-slate-800 border-b border-slate-700">
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-slate-400 small">Responsable Qualité</span>
+                <span class="badge bg-purple-500">RQ</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-slate-300">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+                <a href="/logout" class="btn btn-sm btn-outline-light">Déconnexion</a>
+            </div>
+        </div>
+
+        <article class="content px-4 py-3">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet class="bg-danger text-white p-3">
+    Une erreur s'est produite.
+    <a href="." class="reload text-white">Recharger</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+<style>
+    .bg-slate-900 { background-color: #0f172a; }
+    .bg-slate-800 { background-color: #1e293b; }
+    .bg-slate-700 { background-color: #334155; }
+    .border-slate-700 { border-color: #334155 !important; }
+    .text-slate-300 { color: #cbd5e1; }
+    .text-slate-400 { color: #94a3b8; }
+    .bg-purple-500 { background-color: #8b5cf6; }
+
+    .main-content {
+        min-height: 100vh;
+    }
+
+    .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 60px;
+    }
+</style>

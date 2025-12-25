@@ -1,0 +1,128 @@
+<div class="top-row ps-3 navbar navbar-dark bg-slate-900">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="">
+            <span class="brand-icon">LC</span>
+            <span>DMTT</span>
+        </a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <!-- Dashboard -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="nav-icon">[D]</span> Tableau de bord
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title px-3 mt-3 mb-2">
+            <small class="text-muted text-uppercase">Traçabilité</small>
+        </div>
+
+        <!-- Welds -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="welds">
+                <span class="nav-icon">[S]</span> Soudures
+            </NavLink>
+        </div>
+
+        <!-- Materials -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="materials">
+                <span class="nav-icon">[M]</span> Matériaux
+            </NavLink>
+        </div>
+
+        <!-- NDT Controls -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="ndt-controls">
+                <span class="nav-icon">[C]</span> Contrôles CND
+            </NavLink>
+        </div>
+
+        <!-- Non-conformities -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="non-conformities">
+                <span class="nav-icon">[!]</span> Non-conformités
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title px-3 mt-3 mb-2">
+            <small class="text-muted text-uppercase">Intelligence Artificielle</small>
+        </div>
+
+        <!-- AI Generation -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="ai-generation">
+                <span class="nav-icon">[AI]</span> Génération IA
+            </NavLink>
+        </div>
+
+        <div class="nav-section-title px-3 mt-3 mb-2">
+            <small class="text-muted text-uppercase">Administration</small>
+        </div>
+
+        <!-- Qualifications -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="qualifications">
+                <span class="nav-icon">[Q]</span> Qualifications
+            </NavLink>
+        </div>
+
+        <!-- Reports -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="reports">
+                <span class="nav-icon">[R]</span> Rapports
+            </NavLink>
+        </div>
+
+        <!-- Settings -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="settings">
+                <span class="nav-icon">[*]</span> Paramètres
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+<style>
+    .bg-slate-900 { background-color: #0f172a; }
+
+    .brand-icon {
+        font-size: 1.5rem;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+
+    .nav-section-title {
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+    }
+
+    .nav-icon {
+        margin-right: 0.5rem;
+    }
+
+    .nav-link {
+        color: #94a3b8;
+        border-radius: 0.5rem;
+        margin: 0.1rem 0;
+        transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+        color: #f1f5f9;
+        background-color: #334155;
+    }
+
+    .nav-link.active {
+        color: #fff;
+        background-color: #8b5cf6;
+    }
+</style>

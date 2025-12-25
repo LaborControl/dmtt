@@ -1,0 +1,204 @@
+@page "/login"
+@using LaborControl.Dashboard.Services
+@inject ApiClient ApiClient
+@inject NavigationManager Navigation
+
+<PageTitle>Connexion - DMTT Dashboard</PageTitle>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo">LC</div>
+            <h1>Labor Control DMTT</h1>
+            <p>Tableau de bord - Tricastin</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">
+                @errorMessage
+            </div>
+        }
+
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+            <div class="form-group mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" @bind="loginModel.Email" placeholder="votre@email.com" required />
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label">Mot de passe</label>
+                <input type="password" class="form-control" @bind="loginModel.Password" placeholder="********" required />
+            </div>
+
+            <button type="submit" class="btn btn-purple w-100" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    <span>Connexion...</span>
+                }
+                else
+                {
+                    <span>Se connecter</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="login-footer">
+            <small>Accès réservé au personnel autorisé</small>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private bool isLoading = false;
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var result = await ApiClient.LoginAsync(loginModel.Email, loginModel.Password);
+
+            if (result?.Token != null)
+            {
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = "Email ou mot de passe incorrect";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Erreur de connexion au serveur";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private class LoginModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}
+
+<style>
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        padding: 1rem;
+    }
+
+    .login-card {
+        background: #1e293b;
+        border-radius: 1rem;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin: 0 auto 1rem;
+    }
+
+    .login-header h1 {
+        color: #f1f5f9;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .login-header p {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .form-label {
+        color: #94a3b8;
+        font-size: 0.875rem;
+    }
+
+    .form-control {
+        background: #0f172a;
+        border: 1px solid #334155;
+        color: #f1f5f9;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+    }
+
+    .form-control:focus {
+        background: #0f172a;
+        border-color: #8b5cf6;
+        color: #f1f5f9;
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25);
+    }
+
+    .form-control::placeholder {
+        color: #64748b;
+    }
+
+    .btn-purple {
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-purple:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.5);
+    }
+
+    .btn-purple:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid #ef4444;
+        color: #fca5a5;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #334155;
+        color: #64748b;
+    }
+</style>

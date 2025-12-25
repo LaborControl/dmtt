@@ -1,0 +1,169 @@
+@* Composant DataTable réutilisable - Design System Labor Control *@
+@using VitrineFr.Client.Components.UI
+@typeparam TItem
+
+<div class="data-table-container">
+    @if (IsLoading)
+    {
+        <div class="data-table-loading">
+            <div class="spinner"></div>
+            <p>Chargement...</p>
+        </div>
+    }
+    else if (Items == null || Items.Count == 0)
+    {
+        <div class="data-table-empty">
+            <div class="empty-icon">📋</div>
+            <p>@EmptyMessage</p>
+        </div>
+    }
+    else
+    {
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        @foreach (var column in Columns ?? new List<DataTableColumn>())
+                        {
+                            <th class="data-table-th">
+                                @column?.Title
+                            </th>
+                        }
+                        @if (OnRowClick.HasDelegate)
+                        {
+                            <th class="data-table-th data-table-actions">Actions</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Items)
+                    {
+                        <tr class="data-table-row" @onclick="() => OnRowClick.InvokeAsync(item)">
+                            @foreach (var column in Columns ?? new List<DataTableColumn>())
+                            {
+                                <td class="data-table-td">
+                                    @if (column?.Template != null)
+                                    {
+                                        @column.Template(item!)
+                                    }
+                                    else
+                                    {
+                                        @GetPropertyValue(item, column?.Property ?? "")
+                                    }
+                                </td>
+                            }
+                            @if (OnRowClick.HasDelegate)
+                            {
+                                <td class="data-table-td data-table-actions">
+                                    <Button Variant="secondary" Size="sm" @onclick="() => OnRowClick.InvokeAsync(item)">
+                                        Voir
+                                    </Button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<TItem>? Items { get; set; }
+
+    [Parameter]
+    public List<DataTableColumn>? Columns { get; set; }
+
+    [Parameter]
+    public bool IsLoading { get; set; } = false;
+
+    [Parameter]
+    public string EmptyMessage { get; set; } = "Aucune donnée disponible";
+
+    [Parameter]
+    public EventCallback<TItem> OnRowClick { get; set; }
+
+    private object? GetPropertyValue(TItem item, string propertyName)
+    {
+        if (item == null) return null;
+        var property = typeof(TItem).GetProperty(propertyName);
+        return property?.GetValue(item);
+    }
+}
+
+<style>
+    .data-table-container {
+        background-color: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .data-table-loading,
+    .data-table-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        text-align: center;
+        color: var(--color-neutral-500);
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--color-neutral-200);
+        border-top-color: var(--color-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .data-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table-th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: var(--text-sm);
+        color: var(--color-neutral-700);
+        background-color: var(--color-neutral-50);
+        border-bottom: 1px solid var(--color-neutral-200);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .data-table-row {
+        border-bottom: 1px solid var(--color-neutral-200);
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+    }
+
+    .data-table-row:hover {
+        background-color: var(--color-neutral-50);
+    }
+
+    .data-table-td {
+        padding: 1rem;
+        font-size: var(--text-sm);
+        color: var(--color-neutral-700);
+    }
+
+    .data-table-actions {
+        text-align: center;
+    }
+</style>

@@ -1,0 +1,15 @@
+../../Backend/
+../../vitrine-fr/
+../../nfctools/
+../../AI_JC/
+../../FICHIERS_TEST/
+node_modules/
+.git/
+.gitdesactived/
+.expo/
+dist/
+build/
+*.log
+.DS_Store
+.env.local
+.env.*.local

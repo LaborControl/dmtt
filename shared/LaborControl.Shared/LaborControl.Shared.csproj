@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>LaborControl.Shared</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>LABORCONTROL</Authors>
+    <Description>Shared components, models, and services for LaborControl applications</Description>
+    <RepositoryUrl>https://github.com/LaborControl/laborcontrol-shared</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.9" />
+    <PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
+  </ItemGroup>
+
+</Project>

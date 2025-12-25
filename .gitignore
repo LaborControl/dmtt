@@ -1,0 +1,40 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+publish/
+
+# IDE
+.idea/
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Logs
+*.log
+azure-logs/
+azure-logs.zip
+azure-logs-fresh/
+azure-logs-fresh.zip
+azure-logs2.zip
+nul
+
+# Sensitive files
+appsettings.*.json
+!appsettings.json
+*.xml
+*.pfx
+
+# Node modules (if any)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Zip files
+*.zip

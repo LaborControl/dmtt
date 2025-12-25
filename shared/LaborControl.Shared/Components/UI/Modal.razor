@@ -1,0 +1,182 @@
+@* Composant Modal réutilisable - Design System Labor Control *@
+
+@if (IsOpen)
+{
+    <div class="modal-overlay" @onclick="OnBackdropClick">
+        <div class="modal-content modal-@Size" @onclick:stopPropagation>
+            @if (!string.IsNullOrEmpty(Title))
+            {
+                <div class="modal-header">
+                    <h2 class="modal-title">@Title</h2>
+                    <button class="modal-close" @onclick="Close" type="button">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            }
+
+            <div class="modal-body">
+                @ChildContent
+            </div>
+
+            @if (ShowFooter)
+            {
+                <div class="modal-footer">
+                    @if (FooterContent != null)
+                    {
+                        @FooterContent
+                    }
+                    else
+                    {
+                        <Button Variant="secondary" Size="md" @onclick="Close">Fermer</Button>
+                        @if (OnConfirm.HasDelegate)
+                        {
+                            <Button Variant="primary" Size="md" @onclick="ConfirmAndClose">Confirmer</Button>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; } = false;
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? FooterContent { get; set; }
+
+    [Parameter]
+    public bool ShowFooter { get; set; } = true;
+
+    [Parameter]
+    public bool CloseOnBackdropClick { get; set; } = true;
+
+    [Parameter]
+    public string Size { get; set; } = "md"; // sm, md, lg, xl
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    public async Task Close()
+    {
+        IsOpen = false;
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task OnBackdropClick()
+    {
+        if (CloseOnBackdropClick)
+        {
+            await Close();
+        }
+    }
+
+    private async Task ConfirmAndClose()
+    {
+        await OnConfirm.InvokeAsync();
+        await Close();
+    }
+}
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 1;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-sm {
+        width: 90%;
+        max-width: 400px;
+    }
+
+    .modal-md {
+        width: 90%;
+        max-width: 600px;
+    }
+
+    .modal-lg {
+        width: 90%;
+        max-width: 800px;
+    }
+
+    .modal-xl {
+        width: 90%;
+        max-width: 1000px;
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--color-neutral-200);
+        background-color: var(--color-neutral-50);
+    }
+
+    .modal-title {
+        font-size: var(--text-xl);
+        font-weight: 700;
+        color: var(--color-neutral-900);
+        margin: 0;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--color-neutral-500);
+        transition: color 0.2s ease;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-close:hover {
+        color: var(--color-neutral-900);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-top: 1px solid var(--color-neutral-200);
+        background-color: var(--color-neutral-50);
+    }
+</style>
+

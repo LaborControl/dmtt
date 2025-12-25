@@ -1,0 +1,85 @@
+@* Composant ErrorModal réutilisable - Design System Labor Control *@
+
+<Modal IsOpen="IsOpen"
+       Title="@Title"
+       Size="sm"
+       CloseOnBackdropClick="false"
+       OnClose="OnClose">
+    <div class="error-modal-content">
+        <div class="error-icon">
+            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+
+        <p class="error-message">@Message</p>
+
+        @if (ChildContent != null)
+        {
+            <div class="error-details">
+                @ChildContent
+            </div>
+        }
+    </div>
+
+    <div class="modal-footer">
+        <Button Variant="primary" Size="md" @onclick="OnClose">Fermer</Button>
+    </div>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; } = false;
+
+    [Parameter]
+    public string Title { get; set; } = "Erreur";
+
+    [Parameter]
+    public string Message { get; set; } = "Une erreur s'est produite.";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+}
+
+<style>
+    .error-modal-content {
+        text-align: center;
+    }
+
+    .error-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .error-message {
+        font-size: var(--text-base);
+        color: var(--color-neutral-700);
+        margin: 0 0 1rem 0;
+        line-height: 1.5;
+    }
+
+    .error-details {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        text-align: left;
+        font-family: monospace;
+        font-size: var(--text-sm);
+        color: #991b1b;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+</style>
+

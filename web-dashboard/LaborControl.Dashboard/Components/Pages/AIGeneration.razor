@@ -1,0 +1,397 @@
+@page "/ai-generation"
+@using LaborControl.Dashboard.Services
+@inject ApiClient ApiClient
+
+<PageTitle>Génération IA - DMTT</PageTitle>
+
+<div class="page-content">
+    <div class="mb-4">
+        <h1 class="text-white mb-1">Génération IA</h1>
+        <p class="text-slate-400 mb-0">Assistants IA pour la génération de procédures et programmes</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- DMOS Generation -->
+        <div class="col-lg-6">
+            <div class="card bg-slate-800 border-0 h-100">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-3">
+                    <div class="ai-icon bg-purple">AI</div>
+                    <div>
+                        <h5 class="text-white mb-0">Génération DMOS</h5>
+                        <small class="text-slate-400">Claude AI - Procédures de soudage</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-slate-300 mb-4">
+                        Générez automatiquement des DMOS (Descriptifs de Mode Opératoire de Soudage)
+                        conformes aux normes RCC-M et EN ISO 15614.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label text-slate-400">Procédé de soudage</label>
+                        <select class="form-select bg-slate-700 text-white border-0" @bind="dmosProcess">
+                            <option value="">Sélectionner...</option>
+                            <option value="111">111 - Soudage à l'arc avec électrode enrobée (MMA)</option>
+                            <option value="141">141 - Soudage à l'arc sous protection gazeuse (TIG)</option>
+                            <option value="135">135 - Soudage à l'arc avec fil plein (MAG)</option>
+                            <option value="136">136 - Soudage à l'arc avec fil fourré</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-slate-400">Matériaux de base</label>
+                        <input type="text" class="form-control bg-slate-700 text-white border-0"
+                               placeholder="Ex: P265GH / 16Mo3" @bind="dmosMaterials">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-slate-400">Plage d'épaisseur</label>
+                            <input type="text" class="form-control bg-slate-700 text-white border-0"
+                                   placeholder="Ex: 5-20mm" @bind="dmosThickness">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-slate-400">Positions</label>
+                            <input type="text" class="form-control bg-slate-700 text-white border-0"
+                                   placeholder="Ex: PA, PF, PG" @bind="dmosPositions">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-slate-400">Exigences supplémentaires</label>
+                        <textarea class="form-control bg-slate-700 text-white border-0" rows="2"
+                                  placeholder="Contraintes spécifiques..." @bind="dmosRequirements"></textarea>
+                    </div>
+
+                    <button class="btn btn-purple w-100" @onclick="GenerateDMOS" disabled="@isGeneratingDMOS">
+                        @if (isGeneratingDMOS)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Génération en cours...</span>
+                        }
+                        else
+                        {
+                            <span>Générer DMOS</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NDT Program Generation -->
+        <div class="col-lg-6">
+            <div class="card bg-slate-800 border-0 h-100">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-3">
+                    <div class="ai-icon bg-blue">CND</div>
+                    <div>
+                        <h5 class="text-white mb-0">Programme CND</h5>
+                        <small class="text-slate-400">Claude AI - Programmes de contrôle</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-slate-300 mb-4">
+                        Générez des programmes de Contrôles Non Destructifs adaptés aux exigences
+                        RCC-M avec les bons contrôles et critères d'acceptation.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label text-slate-400">Équipement</label>
+                        <select class="form-select bg-slate-700 text-white border-0" @bind="ndtAsset">
+                            <option value="">Sélectionner...</option>
+                            <option value="gv001">GV-001 - Générateur de vapeur</option>
+                            <option value="rcv002">RCV-002 - Circuit primaire</option>
+                            <option value="ptr003">PTR-003 - Pressuriseur</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-slate-400">Classe de soudure</label>
+                        <select class="form-select bg-slate-700 text-white border-0" @bind="ndtWeldClass">
+                            <option value="">Sélectionner...</option>
+                            <option value="1">Classe 1 - Circuits primaires</option>
+                            <option value="2">Classe 2 - Circuits secondaires importants</option>
+                            <option value="3">Classe 3 - Autres circuits</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-slate-400">Référence CDC</label>
+                        <input type="text" class="form-control bg-slate-700 text-white border-0"
+                               placeholder="Ex: CDC-DMTT-2024-001" @bind="ndtCDCRef">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-slate-400">Exigences additionnelles</label>
+                        <textarea class="form-control bg-slate-700 text-white border-0" rows="2"
+                                  placeholder="Contraintes spécifiques..." @bind="ndtRequirements"></textarea>
+                    </div>
+
+                    <button class="btn btn-blue w-100" @onclick="GenerateNDTProgram" disabled="@isGeneratingNDT">
+                        @if (isGeneratingNDT)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Génération en cours...</span>
+                        }
+                        else
+                        {
+                            <span>Générer Programme CND</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generation History -->
+        <div class="col-12">
+            <div class="card bg-slate-800 border-0">
+                <div class="card-header bg-transparent border-0 text-white">
+                    <h5 class="mb-0">Historique des générations</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead class="bg-slate-900">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Modèle IA</th>
+                                    <th>Tokens</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var gen in generationHistory)
+                                {
+                                    <tr>
+                                        <td class="text-slate-400">@gen.Date</td>
+                                        <td>
+                                            <span class="badge @(gen.Type == "DMOS" ? "bg-purple" : "bg-blue")">@gen.Type</span>
+                                        </td>
+                                        <td class="text-slate-300">@gen.Description</td>
+                                        <td class="text-slate-400">@gen.Model</td>
+                                        <td class="text-slate-400">@gen.Tokens</td>
+                                        <td>
+                                            <span class="badge bg-success">OK</span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-light btn-sm">Voir</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // DMOS Form
+    private string dmosProcess = "";
+    private string dmosMaterials = "";
+    private string dmosThickness = "";
+    private string dmosPositions = "";
+    private string dmosRequirements = "";
+    private bool isGeneratingDMOS = false;
+
+    // NDT Form
+    private string ndtAsset = "";
+    private string ndtWeldClass = "";
+    private string ndtCDCRef = "";
+    private string ndtRequirements = "";
+    private bool isGeneratingNDT = false;
+
+    private List<GenerationRecord> generationHistory = new()
+    {
+        new("24/12/2024 14:32", "DMOS", "DMOS-141 TIG P265GH 5-20mm", "claude-3.5-sonnet", "2,847"),
+        new("24/12/2024 11:15", "CND", "Programme CND GV-001 Classe 1", "claude-3.5-sonnet", "3,124"),
+        new("23/12/2024 16:45", "DMOS", "DMOS-111 MMA 16Mo3 Toutes positions", "claude-3.5-sonnet", "2,956"),
+        new("23/12/2024 09:20", "CND", "Programme CND RCV-002 Classe 2", "claude-3.5-sonnet", "2,512"),
+    };
+
+    private string? lastGeneratedContent;
+    private string? lastError;
+
+    private async Task GenerateDMOS()
+    {
+        if (string.IsNullOrEmpty(dmosProcess))
+        {
+            lastError = "Veuillez sélectionner un procédé de soudage";
+            return;
+        }
+
+        isGeneratingDMOS = true;
+        lastError = null;
+
+        try
+        {
+            var request = new DMOSGenerationRequest
+            {
+                WeldingProcess = dmosProcess,
+                BaseMaterials = dmosMaterials,
+                ThicknessRange = dmosThickness,
+                Positions = dmosPositions,
+                AdditionalRequirements = dmosRequirements
+            };
+
+            var result = await ApiClient.GenerateDMOSAsync(request);
+
+            if (result?.Success == true)
+            {
+                lastGeneratedContent = result.GeneratedContent;
+                generationHistory.Insert(0, new GenerationRecord(
+                    DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                    "DMOS",
+                    $"DMOS-{dmosProcess} {dmosMaterials} {dmosThickness}",
+                    "claude-3.5-sonnet",
+                    result.TokensUsed.ToString("N0")
+                ));
+            }
+            else
+            {
+                lastError = result?.Error ?? "Erreur lors de la génération";
+            }
+        }
+        catch (Exception ex)
+        {
+            lastError = $"Erreur: {ex.Message}";
+        }
+        finally
+        {
+            isGeneratingDMOS = false;
+        }
+    }
+
+    private async Task GenerateNDTProgram()
+    {
+        if (string.IsNullOrEmpty(ndtWeldClass))
+        {
+            lastError = "Veuillez sélectionner une classe de soudure";
+            return;
+        }
+
+        isGeneratingNDT = true;
+        lastError = null;
+
+        try
+        {
+            var request = new NDTProgramGenerationRequest
+            {
+                AssetName = GetAssetName(ndtAsset),
+                WeldClass = ndtWeldClass,
+                CDCReference = ndtCDCRef,
+                AdditionalRequirements = ndtRequirements
+            };
+
+            var result = await ApiClient.GenerateNDTProgramAsync(request);
+
+            if (result?.Success == true)
+            {
+                lastGeneratedContent = result.GeneratedContent;
+                generationHistory.Insert(0, new GenerationRecord(
+                    DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                    "CND",
+                    $"Programme CND {GetAssetName(ndtAsset)} Classe {ndtWeldClass}",
+                    "claude-3.5-sonnet",
+                    result.TokensUsed.ToString("N0")
+                ));
+            }
+            else
+            {
+                lastError = result?.Error ?? "Erreur lors de la génération";
+            }
+        }
+        catch (Exception ex)
+        {
+            lastError = $"Erreur: {ex.Message}";
+        }
+        finally
+        {
+            isGeneratingNDT = false;
+        }
+    }
+
+    private string GetAssetName(string assetId) => assetId switch
+    {
+        "gv001" => "GV-001",
+        "rcv002" => "RCV-002",
+        "ptr003" => "PTR-003",
+        _ => assetId
+    };
+
+    record GenerationRecord(string Date, string Type, string Description, string Model, string Tokens);
+}
+
+<style>
+    .page-content { color: #f1f5f9; }
+    .text-slate-400 { color: #94a3b8; }
+    .text-slate-300 { color: #cbd5e1; }
+    .bg-slate-800 { background-color: #1e293b; }
+    .bg-slate-900 { background-color: #0f172a; }
+    .bg-slate-700 { background-color: #334155; }
+    .bg-purple { background-color: #8b5cf6 !important; }
+    .bg-blue { background-color: #3b82f6 !important; }
+
+    .ai-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .btn-purple {
+        background-color: #8b5cf6;
+        border-color: #8b5cf6;
+        color: white;
+    }
+
+    .btn-purple:hover:not(:disabled) {
+        background-color: #7c3aed;
+        border-color: #7c3aed;
+    }
+
+    .btn-blue {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-blue:hover:not(:disabled) {
+        background-color: #2563eb;
+        border-color: #2563eb;
+    }
+
+    .form-select, .form-control {
+        background-color: #334155 !important;
+    }
+
+    .form-select:focus, .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25);
+    }
+
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-hover-bg: rgba(139, 92, 246, 0.1);
+    }
+
+    .table-dark th {
+        color: #94a3b8;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #334155;
+    }
+
+    .table-dark td {
+        border-bottom: 1px solid #334155;
+        vertical-align: middle;
+    }
+</style>

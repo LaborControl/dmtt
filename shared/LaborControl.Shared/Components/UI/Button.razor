@@ -1,0 +1,134 @@
+@* Composant Button réutilisable - Design System Labor Control *@
+
+<button class="btn btn-@Variant btn-@Size @CustomClass"
+        @onclick="OnClick"
+        disabled="@IsDisabled"
+        type="@ButtonType">
+    @if (!string.IsNullOrEmpty(Icon))
+    {
+        <span class="btn-icon">@((MarkupString)Icon)</span>
+    }
+    @ChildContent
+</button>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string Variant { get; set; } = "primary"; // primary, secondary, danger, success, warning
+
+    [Parameter]
+    public string Size { get; set; } = "md"; // sm, md, lg
+
+    [Parameter]
+    public string ButtonType { get; set; } = "button"; // button, submit, reset
+
+    [Parameter]
+    public bool IsDisabled { get; set; } = false;
+
+    [Parameter]
+    public string CustomClass { get; set; } = "";
+
+    [Parameter]
+    public string? Icon { get; set; } = null;
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+}
+
+<style>
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: var(--font-family);
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: var(--text-sm);
+    }
+
+    .btn-md {
+        padding: 0.75rem 1.5rem;
+        font-size: var(--text-base);
+    }
+
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: var(--text-lg);
+    }
+
+    .btn-primary {
+        background-color: var(--color-primary);
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background-color: var(--color-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+        background-color: var(--color-neutral-200);
+        color: var(--color-neutral-900);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background-color: var(--color-neutral-300);
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background-color: var(--color-semantic-error);
+        color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-success {
+        background-color: var(--color-semantic-success);
+        color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+        background-color: #16a34a;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-warning {
+        background-color: var(--color-semantic-warning);
+        color: white;
+    }
+
+    .btn-warning:hover:not(:disabled) {
+        background-color: #d97706;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+

@@ -1,0 +1,35 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'LaborControl.Shared/**'
+      - '.github/workflows/publish-nuget.yml'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    name: Publish to GitHub Packages
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore LaborControl.Shared/LaborControl.Shared.csproj
+
+      - name: Build
+        run: dotnet build LaborControl.Shared/LaborControl.Shared.csproj -c Release --no-restore
+
+      - name: Pack
+        run: dotnet pack LaborControl.Shared/LaborControl.Shared.csproj -c Release -o ./nupkg
+
+      - name: Publish to GitHub Packages
+        run: dotnet nuget push ./nupkg/*.nupkg --source https://nuget.pkg.github.com/LaborControl/index.json --api-key ${{ secrets.NUGET_TOKEN }} --skip-duplicate

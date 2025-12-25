@@ -1,0 +1,114 @@
+@namespace LaborControl.Shared.Components
+@using LaborControl.Shared.Models
+
+@* Composant récursif pour afficher les zones en arbre hiérarchique *@
+
+<div class="@($"ml-{Zone.Level * 4}")">
+    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 @(isExpanded ? "bg-blue-50" : "bg-white")">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 flex-1">
+                @if (HasSubZones())
+                {
+                    <button @onclick="ToggleExpand" class="text-gray-600 hover:text-blue-600 transition">
+                        @if (isExpanded)
+                        {
+                            <span class="text-xl">▼</span>
+                        }
+                        else
+                        {
+                            <span class="text-xl">▶</span>
+                        }
+                    </button>
+                }
+                else
+                {
+                    <span class="text-xl text-gray-300">●</span>
+                }
+
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <h3 class="font-bold text-gray-900">@Zone.Name</h3>
+                        @if (!string.IsNullOrEmpty(Zone.Code))
+                        {
+                            <span class="text-sm text-gray-600">(@Zone.Code)</span>
+                        }
+                        @if (!string.IsNullOrEmpty(Zone.Type))
+                        {
+                            <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">@Zone.Type</span>
+                        }
+                    </div>
+
+                    <div class="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                        <span>🎯 @Zone.AssetsCount équipement@(Zone.AssetsCount > 1 ? "s" : "")</span>
+                        <span>📍 @Zone.ControlPointsCount point@(Zone.ControlPointsCount > 1 ? "s" : "") de contrôle</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button @onclick="() => OnViewZone.InvokeAsync(Zone.Id)"
+                        class="px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition text-sm font-semibold">
+                    Voir
+                </button>
+                <button @onclick="() => OnEditZone.InvokeAsync(Zone.Id)"
+                        class="px-3 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition text-sm font-semibold">
+                    ✏️
+                </button>
+                <button @onclick="() => OnDeleteZone.InvokeAsync((Zone.Id, Zone.Name))"
+                        class="px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition text-sm font-semibold">
+                    🗑️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (isExpanded && HasSubZones())
+    {
+        <div class="mt-2 space-y-2">
+            @foreach (var subZone in GetSubZones())
+            {
+                <ZoneTreeItem Zone="@subZone"
+                             AllZones="@AllZones"
+                             OnViewZone="@OnViewZone"
+                             OnEditZone="@OnEditZone"
+                             OnDeleteZone="@OnDeleteZone" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ZoneInfo Zone { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public List<ZoneInfo> AllZones { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Guid> OnViewZone { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnEditZone { get; set; }
+
+    [Parameter]
+    public EventCallback<(Guid Id, string Name)> OnDeleteZone { get; set; }
+
+    private bool isExpanded = true; // Déplier par défaut
+
+    private bool HasSubZones()
+    {
+        return AllZones.Any(z => z.ParentZoneId == Zone.Id);
+    }
+
+    private List<ZoneInfo> GetSubZones()
+    {
+        return AllZones.Where(z => z.ParentZoneId == Zone.Id)
+                      .OrderBy(z => z.Name)
+                      .ToList();
+    }
+
+    private void ToggleExpand()
+    {
+        isExpanded = !isExpanded;
+    }
+}

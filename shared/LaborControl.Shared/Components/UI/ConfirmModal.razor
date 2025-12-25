@@ -1,0 +1,123 @@
+@* Composant ConfirmModal réutilisable - Design System Labor Control *@
+
+<Modal IsOpen="IsOpen"
+       Title="@Title"
+       Size="sm"
+       CloseOnBackdropClick="false"
+       OnClose="OnCancel">
+    <div class="confirm-modal-content">
+        @if (!string.IsNullOrEmpty(Icon))
+        {
+            <div class="confirm-icon confirm-icon-@IconType">
+                @((MarkupString)Icon)
+            </div>
+        }
+
+        <p class="confirm-message">@Message</p>
+
+        @if (ChildContent != null)
+        {
+            <div class="confirm-details">
+                @ChildContent
+            </div>
+        }
+    </div>
+
+    <div class="modal-footer">
+        <Button Variant="secondary" Size="md" @onclick="OnCancel">@CancelText</Button>
+        <Button Variant="@ConfirmVariant" Size="md" @onclick="OnConfirmClick">@ConfirmText</Button>
+    </div>
+</Modal>
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; } = false;
+
+    [Parameter]
+    public string Title { get; set; } = "Confirmation";
+
+    [Parameter]
+    public string Message { get; set; } = "";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string ConfirmText { get; set; } = "Confirmer";
+
+    [Parameter]
+    public string CancelText { get; set; } = "Annuler";
+
+    [Parameter]
+    public string ConfirmVariant { get; set; } = "primary"; // primary, danger, success, warning
+
+    [Parameter]
+    public string IconType { get; set; } = "info"; // info, warning, error, success
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task OnConfirmClick()
+    {
+        await OnConfirm.InvokeAsync();
+    }
+}
+
+<style>
+    .confirm-modal-content {
+        text-align: center;
+    }
+
+    .confirm-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 2rem;
+    }
+
+    .confirm-icon-info {
+        background-color: #dbeafe;
+        color: #0284c7;
+    }
+
+    .confirm-icon-warning {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .confirm-icon-error {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .confirm-icon-success {
+        background-color: #dcfce7;
+        color: #16a34a;
+    }
+
+    .confirm-message {
+        font-size: var(--text-base);
+        color: var(--color-neutral-700);
+        margin: 0 0 1rem 0;
+        line-height: 1.5;
+    }
+
+    .confirm-details {
+        background-color: var(--color-neutral-50);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+</style>
+

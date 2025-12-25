@@ -1,0 +1,96 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch: # Permet de lancer manuellement
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Gradle wrapper
+        run: |
+          cd android
+          if [ ! -f gradlew ]; then
+            gradle wrapper
+          fi
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build Android APK (Debug)
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK with version and date
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          DATE=$(date +%Y%m%d-%H%M)
+          cp android/app/build/outputs/apk/debug/app-debug.apk \
+             laborcontrol-v${VERSION}-${DATE}.apk
+
+      - name: Create Release with APK
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "LABOR CONTROL v${{ github.run_number }} - ${{ github.event.head_commit.message }}"
+          body: |
+            📱 **APK Android disponible au téléchargement**
+
+            **Version:** ${{ github.run_number }}
+            **Build:** ${{ github.sha }}
+            **Date:** ${{ github.event.head_commit.timestamp }}
+
+            **Installation:**
+            1. Téléchargez le fichier APK ci-dessous
+            2. Transférez-le sur votre téléphone Android
+            3. Ouvrez le fichier et installez (autorisez les sources inconnues si demandé)
+
+            **Changelog:**
+            ${{ github.event.head_commit.message }}
+
+            ---
+            🤖 Build automatique via GitHub Actions
+          files: laborcontrol-*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment PR with download link
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '📱 APK de test généré ! Téléchargez-le depuis les artifacts de ce workflow.'
+            })

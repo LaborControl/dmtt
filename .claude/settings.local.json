@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(az --version:*)",
+      "Bash(az account show:*)",
+      "Bash(az group list:*)",
+      "Bash(az webapp list:*)",
+      "Bash(az postgres:*)",
+      "Bash(az storage account:*)",
+      "Bash(az keyvault list:*)",
+      "Bash(az communication list:*)",
+      "Bash(az group create:*)",
+      "Bash(az storage container create:*)",
+      "Bash(az appservice plan show:*)",
+      "Bash(az webapp create:*)",
+      "Bash(az account:*)",
+      "Bash(az login:*)",
+      "Bash(az keyvault create:*)",
+      "Bash(az webapp identity assign:*)",
+      "Bash(az keyvault set-policy:*)",
+      "Bash(az webapp config appsettings set:*)",
+      "Bash(az webapp config connection-string set:*)"
+    ]
+  }
+}
