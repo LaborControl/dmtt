@@ -1,0 +1,40 @@
+name: Deploy with CLI
+on:
+  workflow_dispatch:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Build and Publish
+        run: |
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+          dotnet publish backend/LaborControl.API/LaborControl.API.csproj -c Release -o ./publish/api
+          dotnet publish web-dashboard/LaborControl.Dashboard/LaborControl.Dashboard.csproj -c Release -o ./publish/dashboard
+          echo "Build completed!"
+          ls -la ./publish/
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy API
+        run: |
+          cd ./publish/api
+          zip -r ../api.zip .
+          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api --src-path ../api.zip --type zip
+
+      - name: Deploy Dashboard
+        run: |
+          cd ./publish/dashboard
+          zip -r ../dashboard.zip .
+          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard --src-path ../dashboard.zip --type zip
