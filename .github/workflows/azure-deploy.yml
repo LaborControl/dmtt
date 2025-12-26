@@ -12,12 +12,13 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: laborcontrol-dmtt-api
-  AZURE_WEBAPP_PACKAGE_PATH: './publish'
   DOTNET_VERSION: '9.0.x'
 
 jobs:
-  build-and-test:
+  build-test-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: 'production'
 
     steps:
       - name: Checkout code
@@ -39,71 +40,25 @@ jobs:
         continue-on-error: true
 
       - name: Publish API
-        run: dotnet publish backend/LaborControl.API/LaborControl.API.csproj -c Release -o ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/api
+        run: dotnet publish backend/LaborControl.API/LaborControl.API.csproj -c Release -o ./publish/api
 
       - name: Publish Dashboard
-        run: dotnet publish web-dashboard/LaborControl.Dashboard/LaborControl.Dashboard.csproj -c Release -o ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/dashboard
+        run: dotnet publish web-dashboard/LaborControl.Dashboard/LaborControl.Dashboard.csproj -c Release -o ./publish/dashboard
 
-      - name: Upload API artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-package
-          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/api
-
-      - name: Upload Dashboard artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dashboard-package
-          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/dashboard
-
-  deploy-api:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    environment:
-      name: 'production'
-      url: ${{ steps.deploy-api.outputs.webapp-url }}
-
-    steps:
-      - name: Download API artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: api-package
-          path: api-package
-
-      - name: Deploy to Azure Web App
-        id: deploy-api
+      - name: Deploy API to Azure
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-name: laborcontrol-dmtt-api
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: api-package
-
-  deploy-dashboard:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    environment:
-      name: 'production-dashboard'
-
-    steps:
-      - name: Download Dashboard artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dashboard-package
-          path: dashboard-package
+          package: ./publish/api
 
       - name: Deploy Dashboard to Azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: laborcontrol-dmtt-dashboard
           publish-profile: ${{ secrets.AZURE_DASHBOARD_PUBLISH_PROFILE }}
-          package: dashboard-package
+          package: ./publish/dashboard
 
-  notify:
-    runs-on: ubuntu-latest
-    needs: [deploy-api, deploy-dashboard]
-    if: always()
-
-    steps:
       - name: Deployment Status
         run: |
           echo "Deployment completed!"
