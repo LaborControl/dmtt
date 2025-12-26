@@ -7,16 +7,7 @@ Fork complet de LABOR CONTROL adapté au marché du démantèlement nucléaire p
 ## Projet
 
 ### Contexte
-Système de traçabilité et contrôle qualité pour les opérations de démantèlement nucléaire du site du Tricastin. Le système couvre la gestion complète des soudures, contrôles non destructifs (CND), validations CCPU, et génération automatique de procédures et programmes de contrôle par IA.
-
-### Client
-**ORANO** - Démantèlement usine Eurodif Georges Besse I
-- Site : Tricastin (26)
-- Période : Démantèlement jusqu'en 2051
-- Volumes : 1 300 km tuyauteries, 160 000 tonnes acier
-
-### Deadline MVP
-**12 janvier 2025** (19 jours)
+Système de traçabilité et contrôle qualité pour les opérations de démantèlement d'installation nucléaire. Le système couvre la gestion complète des soudures, contrôles non destructifs (CND), validations CCPU, et génération automatique de procédures et programmes de contrôle par IA.
 
 ## Structure du Projet
 
