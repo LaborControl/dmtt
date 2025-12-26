@@ -1,0 +1,12 @@
+name: Test GitHub Token Only
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use GITHUB_TOKEN
+        run: echo "Token works"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
