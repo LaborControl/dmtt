@@ -37,13 +37,13 @@ jobs:
         run: |
           cd ./publish/api
           zip -r ../api.zip .
-          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api --src-path ../api.zip --type zip --clean true
+          az webapp deployment source config-zip --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api --src ../api.zip
 
       - name: Deploy Dashboard
         run: |
           cd ./publish/dashboard
           zip -r ../dashboard.zip .
-          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard --src-path ../dashboard.zip --type zip --clean true
+          az webapp deployment source config-zip --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard --src ../dashboard.zip
 
       - name: Start Apps
         run: |
