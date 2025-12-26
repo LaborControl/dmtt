@@ -57,13 +57,14 @@ jobs:
           USER=$(echo $CREDS | jq -r '.user')
           PASS=$(echo $CREDS | jq -r '.pass')
 
-          # Deploy using curl (more reliable, doesn't have timeout issues)
-          curl -X POST --retry 3 --retry-delay 10 --max-time 900 \
+          # Deploy using curl (synchronous for reliability)
+          echo "Deploying API (this may take a few minutes)..."
+          curl -X POST --retry 3 --retry-delay 10 --max-time 600 \
             -u "$USER:$PASS" \
             --data-binary @../api.zip \
-            "https://laborcontrol-dmtt-api.scm.azurewebsites.net/api/zipdeploy?isAsync=true"
+            "https://laborcontrol-dmtt-api.scm.azurewebsites.net/api/zipdeploy"
           echo ""
-          echo "API deployment initiated"
+          echo "API deployment completed"
 
       - name: Deploy Dashboard via FTP/Kudu
         run: |
@@ -75,18 +76,14 @@ jobs:
           USER=$(echo $CREDS | jq -r '.user')
           PASS=$(echo $CREDS | jq -r '.pass')
 
-          # Deploy using curl
-          curl -X POST --retry 3 --retry-delay 10 --max-time 900 \
+          # Deploy using curl (synchronous for reliability)
+          echo "Deploying Dashboard (this may take a few minutes)..."
+          curl -X POST --retry 3 --retry-delay 10 --max-time 600 \
             -u "$USER:$PASS" \
             --data-binary @../dashboard.zip \
-            "https://laborcontrol-dmtt-dashboard.scm.azurewebsites.net/api/zipdeploy?isAsync=true"
+            "https://laborcontrol-dmtt-dashboard.scm.azurewebsites.net/api/zipdeploy"
           echo ""
-          echo "Dashboard deployment initiated"
-
-      - name: Wait for deployments
-        run: |
-          echo "Waiting for async deployments to complete..."
-          sleep 180
+          echo "Dashboard deployment completed"
 
       - name: Configure Database Connection
         run: |

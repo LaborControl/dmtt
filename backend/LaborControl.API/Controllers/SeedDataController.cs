@@ -124,5 +124,54 @@ namespace LaborControl.API.Controllers
                 userId = admin.Id
             });
         }
+
+        [HttpPost("create-dmtt-staff")]
+        public async Task<IActionResult> CreateDmttStaff()
+        {
+            var email = "codjo@labor-control.fr";
+
+            // Vérifier si l'utilisateur existe déjà
+            var existingUser = await _context.StaffUsers.FirstOrDefaultAsync(u => u.Email == email);
+            if (existingUser != null)
+            {
+                return Ok(new { message = "Compte RQ existe déjà", email = email, userId = existingUser.Id });
+            }
+
+            // Créer le compte RQ DMTT
+            var rqUser = new StaffUser
+            {
+                Id = Guid.NewGuid(),
+                Email = email,
+                Nom = "Codjo",
+                Prenom = "Responsable Qualité",
+                Role = "SUPERADMIN",
+                Department = "Qualité",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("LcDmtt2026RQ"),
+                RequiresPasswordChange = true,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            _context.StaffUsers.Add(rqUser);
+            await _context.SaveChangesAsync();
+
+            return Ok(new {
+                message = "✅ Compte RQ DMTT créé",
+                email = email,
+                password = "LcDmtt2026RQ",
+                userId = rqUser.Id,
+                note = "Le mot de passe devra être changé à la première connexion"
+            });
+        }
+
+        [HttpGet("staff-count")]
+        public async Task<IActionResult> GetStaffCount()
+        {
+            var count = await _context.StaffUsers.CountAsync();
+            var users = await _context.StaffUsers
+                .Select(u => new { u.Email, u.Role, u.IsActive })
+                .ToListAsync();
+            return Ok(new { count, users });
+        }
     }
 }
