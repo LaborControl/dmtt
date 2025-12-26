@@ -29,13 +29,21 @@ jobs:
 
       - name: Clear deployment locks and settings
         run: |
-          # Remove WEBSITE_RUN_FROM_PACKAGE if it exists
-          az webapp config appsettings delete --name laborcontrol-dmtt-api --resource-group laborcontrol-dmtt-rg --setting-names WEBSITE_RUN_FROM_PACKAGE || true
-          az webapp config appsettings delete --name laborcontrol-dmtt-dashboard --resource-group laborcontrol-dmtt-rg --setting-names WEBSITE_RUN_FROM_PACKAGE || true
-          # Stop apps
+          echo "=== Listing current app settings ==="
+          az webapp config appsettings list --name laborcontrol-dmtt-api --resource-group laborcontrol-dmtt-rg --query '[].name' -o tsv || true
+
+          echo "=== Removing WEBSITE_RUN_FROM_PACKAGE ==="
+          az webapp config appsettings delete --name laborcontrol-dmtt-api --resource-group laborcontrol-dmtt-rg --setting-names WEBSITE_RUN_FROM_PACKAGE 2>/dev/null || true
+          az webapp config appsettings delete --name laborcontrol-dmtt-dashboard --resource-group laborcontrol-dmtt-rg --setting-names WEBSITE_RUN_FROM_PACKAGE 2>/dev/null || true
+
+          echo "=== Restarting apps to clear locks ==="
+          az webapp restart --name laborcontrol-dmtt-api --resource-group laborcontrol-dmtt-rg || true
+          az webapp restart --name laborcontrol-dmtt-dashboard --resource-group laborcontrol-dmtt-rg || true
+
+          echo "=== Stopping apps ==="
           az webapp stop --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api || true
           az webapp stop --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard || true
-          sleep 15
+          sleep 30
 
       - name: Deploy API
         run: |
