@@ -76,7 +76,7 @@ namespace LaborControl.API.Controllers
             var users = await _context.Users
                 .Include(u => u.Site)
                 .Include(u => u.Team)
-                    .ThenInclude(t => t.ParentTeam)
+                    .ThenInclude(t => t!.ParentTeam)
                 .Include(u => u.Industry)
                 .Include(u => u.Supervisor)
                 .Where(u => u.CustomerId == customerId && u.IsActive)

@@ -122,8 +122,8 @@ namespace LaborControl.API.Services
 
                         // Envoyer le rappel
                         var emailSent = await emailService.SendMaintenanceReminderEmailAsync(
-                            task.User.Email,
-                            task.User.Prenom,
+                            task.User!.Email!,
+                            task.User!.Prenom!,
                             taskName,
                             task.ScheduledDate,
                             daysUntilDue
@@ -212,8 +212,8 @@ namespace LaborControl.API.Services
 
                             // Envoyer l'alerte
                             var emailSent = await emailService.SendMaintenanceOverdueAlertEmailAsync(
-                                task.User.Email,
-                                task.User.Prenom,
+                                task.User!.Email!,
+                                task.User!.Prenom!,
                                 taskName,
                                 daysOverdue
                             );

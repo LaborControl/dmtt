@@ -51,7 +51,7 @@ namespace LaborControl.API.Services
 
                 var results = GetCommonRncpCertifications()
                     .Where(c => c.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                                c.RncpCode.Contains(query, StringComparison.OrdinalIgnoreCase))
+                                (c.RncpCode != null && c.RncpCode.Contains(query, StringComparison.OrdinalIgnoreCase)))
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
@@ -88,7 +88,7 @@ namespace LaborControl.API.Services
 
                 var results = GetCommonRsCertifications()
                     .Where(c => c.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                                c.RsCode.Contains(query, StringComparison.OrdinalIgnoreCase))
+                                (c.RsCode != null && c.RsCode.Contains(query, StringComparison.OrdinalIgnoreCase)))
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();

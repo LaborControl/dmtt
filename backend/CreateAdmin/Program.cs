@@ -63,7 +63,7 @@ ON CONFLICT (""Email"") DO UPDATE SET
 using var cmd = new NpgsqlCommand(sql, connection);
 cmd.Parameters.AddWithValue("email", email);
 cmd.Parameters.AddWithValue("passwordHash", passwordHash);
-cmd.Parameters.AddWithValue("customerId", customerId);
+cmd.Parameters.AddWithValue("customerId", customerId!);
 
 try
 {

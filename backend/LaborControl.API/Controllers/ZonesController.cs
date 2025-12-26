@@ -51,7 +51,7 @@ namespace LaborControl.API.Controllers
 
                 var controlPointsCounts = await _context.ControlPoints
                     .Where(cp => cp.ZoneId.HasValue && zoneIds.Contains(cp.ZoneId.Value) && cp.IsActive)
-                    .GroupBy(cp => cp.ZoneId.Value)
+                    .GroupBy(cp => cp.ZoneId!.Value)
                     .Select(g => new { ZoneId = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(x => x.ZoneId, x => x.Count);
 
