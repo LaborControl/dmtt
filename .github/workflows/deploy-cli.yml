@@ -27,11 +27,15 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Stop Apps Before Deploy
+      - name: Clear deployment locks and settings
         run: |
+          # Remove WEBSITE_RUN_FROM_PACKAGE if it exists
+          az webapp config appsettings delete --name laborcontrol-dmtt-api --resource-group laborcontrol-dmtt-rg --setting-names WEBSITE_RUN_FROM_PACKAGE || true
+          az webapp config appsettings delete --name laborcontrol-dmtt-dashboard --resource-group laborcontrol-dmtt-rg --setting-names WEBSITE_RUN_FROM_PACKAGE || true
+          # Stop apps
           az webapp stop --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api || true
           az webapp stop --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard || true
-          sleep 10
+          sleep 15
 
       - name: Deploy API
         run: |
