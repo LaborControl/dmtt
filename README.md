@@ -1,8 +1,6 @@
 # LABOR CONTROL DMTT
 
-**D**émantèlement **M**arché **T**ricastin **T**echnology
-
-Fork complet de LABOR CONTROL adapté au marché du démantèlement nucléaire pour le site du Tricastin (usine Eurodif).
+Fork complet de LABOR CONTROL adapté au marché du démantèlement de site nucléaire
 
 ## Projet
 
