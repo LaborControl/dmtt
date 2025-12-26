@@ -74,7 +74,7 @@ labor-control-dmtt/
 - Traçabilité matériaux → soudures
 
 ### 5. Procédures
-- Génération automatique procédures par IA (CDC ORANO + normes EDF)
+- Génération automatique procédures par IA (CDC + normes EDF)
 - DMOS (Descriptifs de Mode Opératoire de Soudage)
 - Programmes de CND personnalisés
 
@@ -276,6 +276,3 @@ Pour toute question technique ou fonctionnelle, consulter la documentation dans 
 
 Propriétaire - LABOR CONTROL DMTT © 2025
 
----
-
-**Bon courage pour le MVP !** 🚀
