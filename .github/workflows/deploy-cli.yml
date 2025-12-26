@@ -88,7 +88,42 @@ jobs:
           echo "Waiting for async deployments to complete..."
           sleep 180
 
+      - name: Configure Database Connection
+        run: |
+          echo "=== Setting PostgreSQL password ==="
+          az postgres flexible-server update \
+            --name lcdmtt-postgres \
+            --resource-group laborcontrol-dmtt-rg \
+            --admin-password 'LcDmtt2026Secure' || true
+
+          echo "=== Configuring API connection string ==="
+          az webapp config connection-string set \
+            --name laborcontrol-dmtt-api \
+            --resource-group laborcontrol-dmtt-rg \
+            --connection-string-type PostgreSql \
+            --settings "DefaultConnection=Host=lcdmtt-postgres.postgres.database.azure.com;Database=laborcontrol;Username=laboradmin;Password=LcDmtt2026Secure;Ssl Mode=Require"
+
+          echo "=== Setting ASPNETCORE_ENVIRONMENT ==="
+          az webapp config appsettings set \
+            --name laborcontrol-dmtt-api \
+            --resource-group laborcontrol-dmtt-rg \
+            --settings ASPNETCORE_ENVIRONMENT=Production
+
+          az webapp config appsettings set \
+            --name laborcontrol-dmtt-dashboard \
+            --resource-group laborcontrol-dmtt-rg \
+            --settings ASPNETCORE_ENVIRONMENT=Production
+
       - name: Start Apps
         run: |
           az webapp start --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api
           az webapp start --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard
+          echo "Waiting for apps to start..."
+          sleep 30
+
+      - name: Verify Deployment
+        run: |
+          echo "=== Checking API health ==="
+          curl -s -o /dev/null -w "API Status: %{http_code}\n" https://laborcontrol-dmtt-api.azurewebsites.net/ || true
+          echo "=== Checking Dashboard ==="
+          curl -s -o /dev/null -w "Dashboard Status: %{http_code}\n" https://laborcontrol-dmtt-dashboard.azurewebsites.net/ || true
