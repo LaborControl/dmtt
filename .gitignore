@@ -50,3 +50,11 @@ LogFiles/
 
 # Temp files
 *.zip
+
+# Large documentation files (stored separately for AI)
+docs/NORMES/
+
+# Large build artifacts
+*.tar.gz
+*.tar
+deploy.tar.gz
