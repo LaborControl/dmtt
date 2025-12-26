@@ -54,6 +54,20 @@ jobs:
           echo "=== Checking controller methods in DLL ==="
           strings ./publish/api/LaborControl.API.dll | grep -i "create-dmtt-staff" || echo "Method not found in DLL"
 
+      - name: Clear API site content
+        run: |
+          # Get publishing credentials
+          CREDS=$(az webapp deployment list-publishing-profiles --name laborcontrol-dmtt-api --resource-group laborcontrol-dmtt-rg --query "[?publishMethod=='ZipDeploy'].{user:userName, pass:userPWD}[0]" -o json)
+          USER=$(echo $CREDS | jq -r '.user')
+          PASS=$(echo $CREDS | jq -r '.pass')
+
+          echo "=== Clearing site/wwwroot content ==="
+          curl -s -X DELETE -u "$USER:$PASS" \
+            "https://laborcontrol-dmtt-api.scm.azurewebsites.net/api/vfs/site/wwwroot/?recursive=true" || true
+
+          echo "=== Site content cleared ==="
+          sleep 5
+
       - name: Deploy API via FTP/Kudu
         env:
           API_ZIP: ${{ github.workspace }}/publish/api.zip
@@ -66,15 +80,20 @@ jobs:
           USER=$(echo $CREDS | jq -r '.user')
           PASS=$(echo $CREDS | jq -r '.pass')
 
-          # Deploy using wardeploy (forces clean deployment)
-          echo "Deploying API with wardeploy (this may take a few minutes)..."
+          # Deploy using zipdeploy
+          echo "Deploying API with zipdeploy (this may take a few minutes)..."
           RESPONSE=$(curl -s -X POST --retry 3 --retry-delay 10 --max-time 600 \
             -u "$USER:$PASS" \
             --data-binary @../api.zip \
             -w "\nHTTP_STATUS:%{http_code}" \
-            "https://laborcontrol-dmtt-api.scm.azurewebsites.net/api/wardeploy")
+            "https://laborcontrol-dmtt-api.scm.azurewebsites.net/api/zipdeploy?isAsync=false")
           echo "$RESPONSE"
-          echo "API deployment completed"
+          HTTP_CODE=$(echo "$RESPONSE" | grep -o 'HTTP_STATUS:[0-9]*' | cut -d: -f2)
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "202" ]; then
+            echo "ERROR: Deployment failed with status $HTTP_CODE"
+            exit 1
+          fi
+          echo "API deployment completed successfully"
 
       - name: Deploy Dashboard via FTP/Kudu
         run: |
