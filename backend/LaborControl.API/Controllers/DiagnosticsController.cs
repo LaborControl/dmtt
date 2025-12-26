@@ -1,4 +1,5 @@
 using LaborControl.API.Data;
+using LaborControl.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -202,6 +203,97 @@ namespace LaborControl.API.Controllers
                     stackTrace = ex.StackTrace
                 });
             }
+        }
+
+        /// <summary>
+        /// Créer le compte RQ pour DMTT
+        /// </summary>
+        [HttpPost("create-dmtt-rq")]
+        public async Task<ActionResult> CreateDmttRQ([FromQuery] string confirmKey)
+        {
+            if (confirmKey != "DMTT-RQ-2026")
+            {
+                return Unauthorized(new { error = "Invalid confirmation key" });
+            }
+
+            try
+            {
+                var email = "codjo@labor-control.fr";
+
+                // Vérifier si l'utilisateur existe déjà
+                var existingUser = await _context.StaffUsers.FirstOrDefaultAsync(u => u.Email == email);
+                if (existingUser != null)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Compte RQ existe déjà",
+                        email = email,
+                        userId = existingUser.Id
+                    });
+                }
+
+                // Créer le compte RQ
+                var rqUser = new StaffUser
+                {
+                    Id = Guid.NewGuid(),
+                    Email = email,
+                    Nom = "Codjo",
+                    Prenom = "Responsable Qualité",
+                    Role = "SUPERADMIN",
+                    Department = "Qualité",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("LcDmtt2026RQ"),
+                    RequiresPasswordChange = true,
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                _context.StaffUsers.Add(rqUser);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"[DMTT] Compte RQ créé: {email}");
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Compte RQ DMTT créé avec succès",
+                    email = email,
+                    password = "LcDmtt2026RQ",
+                    userId = rqUser.Id,
+                    note = "Le mot de passe devra être changé à la première connexion"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[DMTT] Erreur lors de la création du compte RQ");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    error = ex.Message
+                });
+            }
+        }
+
+        /// <summary>
+        /// Liste les comptes staff existants
+        /// </summary>
+        [HttpGet("staff-users")]
+        public async Task<ActionResult> GetStaffUsers([FromQuery] string confirmKey)
+        {
+            if (confirmKey != "DMTT-RQ-2026")
+            {
+                return Unauthorized(new { error = "Invalid confirmation key" });
+            }
+
+            var staffUsers = await _context.StaffUsers
+                .Select(u => new { u.Id, u.Email, u.Nom, u.Prenom, u.Role, u.IsActive, u.CreatedAt })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                count = staffUsers.Count,
+                users = staffUsers
+            });
         }
     }
 }
