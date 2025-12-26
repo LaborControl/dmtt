@@ -45,25 +45,48 @@ jobs:
           az webapp stop --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard || true
           sleep 30
 
-      - name: Deploy API
+      - name: Deploy API via FTP/Kudu
+        env:
+          API_ZIP: ${{ github.workspace }}/publish/api.zip
         run: |
           cd ./publish/api
           zip -r ../api.zip .
-          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api --src-path ../api.zip --type zip --async true --timeout 600
 
-      - name: Deploy Dashboard
+          # Get publishing credentials
+          CREDS=$(az webapp deployment list-publishing-profiles --name laborcontrol-dmtt-api --resource-group laborcontrol-dmtt-rg --query "[?publishMethod=='ZipDeploy'].{user:userName, pass:userPWD}[0]" -o json)
+          USER=$(echo $CREDS | jq -r '.user')
+          PASS=$(echo $CREDS | jq -r '.pass')
+
+          # Deploy using curl (more reliable, doesn't have timeout issues)
+          curl -X POST --retry 3 --retry-delay 10 --max-time 900 \
+            -u "$USER:$PASS" \
+            --data-binary @../api.zip \
+            "https://laborcontrol-dmtt-api.scm.azurewebsites.net/api/zipdeploy?isAsync=true"
+          echo ""
+          echo "API deployment initiated"
+
+      - name: Deploy Dashboard via FTP/Kudu
         run: |
           cd ./publish/dashboard
           zip -r ../dashboard.zip .
-          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard --src-path ../dashboard.zip --type zip --async true --timeout 600
 
-      - name: Wait for deployments to complete
+          # Get publishing credentials
+          CREDS=$(az webapp deployment list-publishing-profiles --name laborcontrol-dmtt-dashboard --resource-group laborcontrol-dmtt-rg --query "[?publishMethod=='ZipDeploy'].{user:userName, pass:userPWD}[0]" -o json)
+          USER=$(echo $CREDS | jq -r '.user')
+          PASS=$(echo $CREDS | jq -r '.pass')
+
+          # Deploy using curl
+          curl -X POST --retry 3 --retry-delay 10 --max-time 900 \
+            -u "$USER:$PASS" \
+            --data-binary @../dashboard.zip \
+            "https://laborcontrol-dmtt-dashboard.scm.azurewebsites.net/api/zipdeploy?isAsync=true"
+          echo ""
+          echo "Dashboard deployment initiated"
+
+      - name: Wait for deployments
         run: |
-          echo "Waiting for deployments to complete..."
-          sleep 120
-          echo "Checking deployment status..."
-          az webapp show --name laborcontrol-dmtt-api --resource-group laborcontrol-dmtt-rg --query "state" -o tsv
-          az webapp show --name laborcontrol-dmtt-dashboard --resource-group laborcontrol-dmtt-rg --query "state" -o tsv
+          echo "Waiting for async deployments to complete..."
+          sleep 180
 
       - name: Start Apps
         run: |
