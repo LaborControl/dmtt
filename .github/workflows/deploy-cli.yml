@@ -45,6 +45,15 @@ jobs:
           az webapp stop --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard || true
           sleep 30
 
+      - name: Verify Build Output
+        run: |
+          echo "=== Checking SeedDataController in published output ==="
+          ls -la ./publish/api/
+          echo "=== Checking for LaborControl.API.dll ==="
+          ls -la ./publish/api/LaborControl.API.dll || echo "DLL not found!"
+          echo "=== Checking controller methods in DLL ==="
+          strings ./publish/api/LaborControl.API.dll | grep -i "create-dmtt-staff" || echo "Method not found in DLL"
+
       - name: Deploy API via FTP/Kudu
         env:
           API_ZIP: ${{ github.workspace }}/publish/api.zip
@@ -57,13 +66,14 @@ jobs:
           USER=$(echo $CREDS | jq -r '.user')
           PASS=$(echo $CREDS | jq -r '.pass')
 
-          # Deploy using curl (synchronous for reliability)
-          echo "Deploying API (this may take a few minutes)..."
-          curl -X POST --retry 3 --retry-delay 10 --max-time 600 \
+          # Deploy using wardeploy (forces clean deployment)
+          echo "Deploying API with wardeploy (this may take a few minutes)..."
+          RESPONSE=$(curl -s -X POST --retry 3 --retry-delay 10 --max-time 600 \
             -u "$USER:$PASS" \
             --data-binary @../api.zip \
-            "https://laborcontrol-dmtt-api.scm.azurewebsites.net/api/zipdeploy"
-          echo ""
+            -w "\nHTTP_STATUS:%{http_code}" \
+            "https://laborcontrol-dmtt-api.scm.azurewebsites.net/api/wardeploy")
+          echo "$RESPONSE"
           echo "API deployment completed"
 
       - name: Deploy Dashboard via FTP/Kudu
@@ -122,5 +132,10 @@ jobs:
         run: |
           echo "=== Checking API health ==="
           curl -s -o /dev/null -w "API Status: %{http_code}\n" https://laborcontrol-dmtt-api.azurewebsites.net/ || true
+          echo "=== Checking diagnostics health ==="
+          curl -s "https://laborcontrol-dmtt-api.azurewebsites.net/api/diagnostics/health" || true
+          echo ""
+          echo "=== Testing create-dmtt-staff endpoint ==="
+          curl -s -w "\nHTTP_CODE: %{http_code}\n" -X POST "https://laborcontrol-dmtt-api.azurewebsites.net/api/seed/create-dmtt-staff" || true
           echo "=== Checking Dashboard ==="
           curl -s -o /dev/null -w "Dashboard Status: %{http_code}\n" https://laborcontrol-dmtt-dashboard.azurewebsites.net/ || true
