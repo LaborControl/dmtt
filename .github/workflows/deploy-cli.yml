@@ -27,14 +27,25 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Stop Apps Before Deploy
+        run: |
+          az webapp stop --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api || true
+          az webapp stop --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard || true
+          sleep 10
+
       - name: Deploy API
         run: |
           cd ./publish/api
           zip -r ../api.zip .
-          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api --src-path ../api.zip --type zip
+          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api --src-path ../api.zip --type zip --clean true
 
       - name: Deploy Dashboard
         run: |
           cd ./publish/dashboard
           zip -r ../dashboard.zip .
-          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard --src-path ../dashboard.zip --type zip
+          az webapp deploy --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard --src-path ../dashboard.zip --type zip --clean true
+
+      - name: Start Apps
+        run: |
+          az webapp start --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-api
+          az webapp start --resource-group laborcontrol-dmtt-rg --name laborcontrol-dmtt-dashboard
